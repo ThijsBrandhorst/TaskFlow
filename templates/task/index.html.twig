@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ asset('styles/task/index.css') }}"
+{% endblock %}
+
+{% block sidebar %}
+
+    <div class="progress-wrapper ms-5 ps-5 mt-5">
+        <div class="progress" style="--progress: {{ percentDone }}">
+            <div class="number poppins-semibold">
+                {{ percentDone }}%
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block body %}
+
+    <h1 class="text-white poppins-semibold my-5 header">Your tasks</h1>
+
+    <div class="tasks-wrapper poppins-regular my-5">
+
+        <form action="{{ path('app_task_create') }}" method="POST">
+            <div class="form-group d-flex align-items-center">
+                <input
+                        type="text"
+                        class="form-control rounded-4 p-3 mb-4 border-0 create-btn"
+                        name="task_body"
+                        id="task_body"
+                        aria-describedby="create task"
+                        placeholder="What's gonna be your next task?"
+                />
+                <button
+                        type="submit"
+                        class="btn btn-primary ml-2 d-none"
+                >Submit
+                </button>
+            </div>
+        </form>
+
+        <div><br></div>
+
+        {% if tasks|length <= 0 %}
+            <div class="text-center text-white poppins-semibold fs-4">
+                You have no tasks
+            </div>
+        {% endif %}
+
+        <div class="tasks-container px-2" style="max-height: 50vh; overflow-y: auto;">
+
+            {% for task in tasks %}
+                <div class="w-100 bg-white rounded-4 p-3 mb-4 {% if task.isCompleted != 0 %}text-decoration-line-through{% endif %}" style="position: relative;">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="task-body">
+                            {% if not task.isCompleted %}
+                                <form action="{{ path('app_task_edit', {'id': task.id}) }}" method="post" class="edit-form">
+                                    <input type="text" name="new_body" value="{{ task.body }}" class="editInput w-100 rounded-4">
+                                </form>
+                            {% else %}
+                                <span>{{ task.body }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <div class="round">
+                                <form action="{{ path('app_task_complete', {'id': task.id}) }}" method="post">
+                                    <input type="checkbox" id="checkbox-{{ loop.index }}" onchange="this.form.submit()"{% if task.isCompleted != 0 %} checked {% endif %}>
+                                    <label for="checkbox-{{ loop.index }}"></label>
+                                </form>
+                            </div>
+                        </div>
+                        {% if task.isCompleted != 0 %}
+                            <div class="remove-button-container" style="position: absolute; top: 50%; right: 60px; transform: translateY(-50%);">
+                                <form action="{{ path('app_task_delete', {'id': task.id}) }}" method="post" class="remove-task-form">
+                                    <button class="rounded-circle px-2 py-1 delete-btn" type="submit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#fff" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <script>
+                //Script voor enter = save ipv sumbit button
+                document.querySelectorAll('.edit-form').forEach(function (form) {
+                    form.addEventListener('keypress', function (event) {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            this.submit();
+                        }
+                    });
+                });
+            </script>
+
+        </div>
+
+    </div>
+
+{% endblock %}
